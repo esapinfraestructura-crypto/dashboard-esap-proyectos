@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Ejecutivo de Proyectos · GIM ESAP</title>
+<style>
+:root{
+  --navy:#0B2E6E;
+  --navy-deep:#071F4D;
+  --teal:#1A7A6E;
+  --gold:#C8970A;
+  --green:#1F9D55;
+  --blue:#2F6FE0;
+  --purple:#7C4DFF;
+  --gray:#8B96A8;
+  --gray-light:#CBD5E1;
+  --red:#D6483F;
+
+  --bg:#EEF2F8;
+  --bg-soft:#F6F8FC;
+  --surface:#FFFFFF;
+  --surface-2:#FBFCFE;
+  --border:#E2E8F1;
+  --text:#101B33;
+  --text-dim:#5B6B85;
+  --text-faint:#8C99AF;
+  --shadow: 0 1px 2px rgba(15,32,70,.04), 0 8px 24px -12px rgba(15,32,70,.14);
+  --shadow-lg: 0 20px 48px -16px rgba(15,32,70,.28);
+  --radius: 14px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+}
+[data-theme="dark"]{
+  --bg:#0A1122;
+  --bg-soft:#0D1730;
+  --surface:#111D38;
+  --surface-2:#0D1730;
+  --border:#1E2C4C;
+  --text:#EAF0FB;
+  --text-dim:#9FADC9;
+  --text-faint:#67759A;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  --shadow-lg: 0 20px 48px -16px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  transition:background .25s ease, color .25s ease;
+}
+::selection{background:var(--gold); color:#1a1500;}
+a{color:inherit;}
+button{font-family:inherit;}
+
+.wrap{max-width:1440px; margin:0 auto; padding:0 28px 80px;}
+@media (max-width:720px){ .wrap{padding:0 14px 60px;} }
+
+/* ============ TOPBAR ============ */
+.topbar{
+  background:linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 62%, #123a82 100%);
+  color:#fff;
+  position:relative;
+  overflow:hidden;
+}
+.topbar::before{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    radial-gradient(circle at 85% 20%, rgba(200,151,10,.18), transparent 45%),
+    radial-gradient(circle at 15% 90%, rgba(26,122,110,.25), transparent 50%);
+  pointer-events:none;
+}
+.topbar-inner{
+  max-width:1440px; margin:0 auto; padding:22px 28px 26px;
+  position:relative; z-index:1;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap;
+}
+@media (max-width:720px){ .topbar-inner{padding:18px 14px 22px;} }
+.brand{display:flex; align-items:center; gap:14px;}
+.brand-mark{
+  width:46px; height:46px; border-radius:12px;
+  background:linear-gradient(135deg, var(--gold), #a97800);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:17px; letter-spacing:-.5px; color:#1a1500;
+  box-shadow:0 6px 16px -4px rgba(200,151,10,.55);
+  flex-shrink:0;
+}
+.brand-text .eyebrow{
+  font-size:11px; text-transform:uppercase; letter-spacing:1.6px; font-weight:700;
+  color:#9FC2D9; opacity:.85; margin:0 0 3px;
+}
+.brand-text h1{
+  margin:0; font-size:22px; font-weight:800; letter-spacing:-.3px; line-height:1.15;
+}
+.brand-text p{
+  margin:5px 0 0; font-size:13px; color:#BFD0EA; font-weight:500;
+}
+.topbar-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.pill{
+  display:flex; align-items:center; gap:7px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  padding:8px 14px; border-radius:999px;
+  font-size:12.5px; color:#DCE7F7; font-weight:600;
+  backdrop-filter:blur(6px);
+}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--green); box-shadow:0 0 0 3px rgba(31,157,85,.25);}
+.theme-toggle{
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
+  padding:8px 12px; border-radius:999px; color:#fff; font-size:12.5px; font-weight:600;
+  transition:background .2s;
+}
+.theme-toggle:hover{background:rgba(255,255,255,.16);}
+
+/* ============ PIPELINE STRIP (signature element) ============ */
+.pipeline-band{
+  position:relative; z-index:1;
+  max-width:1440px; margin:0 auto; padding:0 28px 20px;
+}
+@media (max-width:720px){ .pipeline-band{padding:0 14px 18px;} }
+.pipeline{
+  display:flex; align-items:center; gap:0;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px; padding:14px 18px;
+  overflow-x:auto;
+}
+.pl-step{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+.pl-node{
+  width:30px; height:30px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:800; color:#fff;
+  background:rgba(255,255,255,.14); border:1.5px solid rgba(255,255,255,.28);
+  flex-shrink:0;
+}
+.pl-label{font-size:12px; font-weight:700; color:#CBDCF2; white-space:nowrap;}
+.pl-count{font-size:10.5px; color:#8FA9CC; font-weight:600;}
+.pl-line{width:38px; height:2px; background:rgba(255,255,255,.18); margin:0 6px; flex-shrink:0;}
+@media (max-width:900px){ .pl-line{width:20px;} .pl-label{display:none;} }
+
+.subsection-divider{
+  display:flex; align-items:center; gap:14px; margin:44px 0 6px;
+}
+.subsection-divider .line{flex:1; height:1px; background:var(--border);}
+.subsection-divider .tag{
+  font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px;
+  color:#fff; background:var(--teal); padding:6px 14px; border-radius:999px; white-space:nowrap;
+}
+
+/* ============ TAB NAV ============ */
+.tabnav{
+  background:var(--navy-deep); border-bottom:1px solid rgba(255,255,255,.08);
+  position:sticky; top:0; z-index:20;
+}
+.tabnav-inner{
+  max-width:1440px; margin:0 auto; padding:0 28px; display:flex; gap:4px; overflow-x:auto;
+}
+@media (max-width:720px){ .tabnav-inner{padding:0 14px;} }
+.tab-btn{
+  display:flex; align-items:center; gap:8px; padding:14px 18px; background:none; border:none;
+  border-bottom:3px solid transparent; color:#93A6C9; font-size:13px; font-weight:700; cursor:pointer;
+  white-space:nowrap; transition:color .15s, border-color .15s;
+}
+.tab-btn svg{width:16px; height:16px;}
+.tab-btn:hover{color:#DCE7F7;}
+.tab-btn.active{color:#fff; border-bottom-color:var(--gold);}
+.tab-count{
+  background:rgba(255,255,255,.1); border-radius:999px; padding:1px 8px; font-size:11px; font-weight:800;
+}
+.tab-btn.active .tab-count{background:var(--gold); color:#1a1500;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ============ PIPELINE CARD (in-flow, light-mode aware) ============ */
+.pipeline-card{
+  background:linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 62%, #123a82 100%);
+  border-radius:var(--radius); padding:20px 22px; color:#fff; box-shadow:var(--shadow-lg); position:relative; overflow:hidden;
+}
+.pipeline-card::before{
+  content:""; position:absolute; inset:0;
+  background-image:radial-gradient(circle at 90% 15%, rgba(200,151,10,.2), transparent 45%);
+  pointer-events:none;
+}
+.pipeline-card-head{position:relative; z-index:1; margin-bottom:14px;}
+.pipeline-card-head h3{margin:2px 0 0; font-size:16px; font-weight:800;}
+.pipeline-intro{position:relative; z-index:1; font-size:13px; line-height:1.65; color:#CBDCF2; max-width:900px; margin:0;}
+.pipeline-card .pipeline{
+  position:relative; z-index:1;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+  border-radius:12px; padding:14px 18px; display:flex; align-items:center; overflow-x:auto;
+}
+
+/* ============ TERRITORIAL CARDS ============ */
+.terr-cards{display:grid; grid-template-columns:repeat(2, 1fr); gap:14px;}
+@media (max-width:900px){ .terr-cards{grid-template-columns:1fr;} }
+.terr-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:16px 18px; box-shadow:var(--shadow); border-left:4px solid var(--accent);
+}
+.terr-card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:8px;}
+.terr-card-top h4{margin:0; font-size:14px; font-weight:800; line-height:1.3;}
+.terr-date{font-size:10.5px; color:var(--text-faint); font-weight:700; white-space:nowrap; margin-top:2px;}
+.terr-card p{margin:8px 0 0; font-size:12.5px; color:var(--text-dim); line-height:1.6;}
+
+/* ============ NOTE BOX ============ */
+.note-box{
+  display:flex; align-items:flex-start; gap:10px;
+  background:#FDF6E3;
+  border:1px solid #E9CE7E;
+  border-radius:12px; padding:13px 16px;
+  font-size:12.5px; line-height:1.55; color:var(--text-dim);
+}
+[data-theme="dark"] .note-box{ background:#2A2410; border-color:#5C4C1A; }
+.note-box svg{color:var(--gold); flex-shrink:0; margin-top:2px;}
+.note-box strong{color:var(--text);}
+
+/* ============ SECTION HEADERS ============ */
+.section{padding-top:36px;}
+.section-head{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:16px; flex-wrap:wrap;}
+.section-head .eyebrow{
+  font-size:11px; text-transform:uppercase; letter-spacing:1.4px; font-weight:800; color:var(--teal); margin:0 0 4px;
+}
+.section-head h2{margin:0; font-size:19px; font-weight:800; letter-spacing:-.2px;}
+.section-head p{margin:4px 0 0; font-size:13px; color:var(--text-dim); max-width:640px;}
+
+/* ============ KPI CARDS ============ */
+.kpi-grid{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;
+}
+@media (max-width:1100px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:560px){ .kpi-grid{grid-template-columns:1fr;} }
+.kpi-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:18px 18px 16px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.kpi-card:hover{transform:translateY(-2px); box-shadow:var(--shadow-lg);}
+.kpi-card::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent, var(--navy));
+}
+.kpi-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+.kpi-icon{
+  width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  background:var(--accent-tint, #E7ECF5);
+  color:var(--accent, var(--navy));
+}
+.kpi-icon svg{width:18px; height:18px;}
+.kpi-trend{font-size:11px; font-weight:700; color:var(--text-faint);}
+.kpi-value{font-size:30px; font-weight:800; letter-spacing:-.6px; line-height:1; font-variant-numeric:tabular-nums;}
+.kpi-label{font-size:12.5px; color:var(--text-dim); margin-top:6px; font-weight:600;}
+.kpi-sub{font-size:11.5px; color:var(--text-faint); margin-top:8px; line-height:1.4;}
+
+.info-strip{
+  display:flex; align-items:flex-start; gap:10px;
+  background:#EAF5F3;
+  border:1px solid #A9D6CE;
+  border-radius:12px; padding:13px 16px; margin-top:16px;
+  font-size:12.5px; line-height:1.55; color:var(--text-dim);
+}
+[data-theme="dark"] .info-strip{ background:#0F2622; border-color:#1F4A42; }
+.info-strip svg{color:var(--teal); flex-shrink:0; margin-top:2px;}
+.info-strip strong{color:var(--text);}
+
+/* ============ CHART CARDS ============ */
+.grid-2{display:grid; grid-template-columns:1.1fr 1fr; gap:16px;}
+@media (max-width:980px){ .grid-2{grid-template-columns:1fr;} }
+.grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+@media (max-width:980px){ .grid-3{grid-template-columns:1fr;} }
+
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:20px; box-shadow:var(--shadow);
+}
+.card-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; gap:10px; flex-wrap:wrap;}
+.card-head h3{margin:0; font-size:14.5px; font-weight:800;}
+.card-head .hint{font-size:11.5px; color:var(--text-faint); font-weight:600;}
+
+.legend{display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:14px;}
+.legend-item{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-dim); font-weight:600;}
+.legend-swatch{width:9px; height:9px; border-radius:3px; flex-shrink:0;}
+
+.bar-row{display:grid; grid-template-columns:150px 1fr 46px; align-items:center; gap:10px; margin-bottom:12px;}
+.bar-row:last-child{margin-bottom:0;}
+.bar-label{font-size:12.5px; font-weight:700; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.bar-track{height:10px; background:var(--bg-soft); border-radius:6px; overflow:hidden; position:relative;}
+.bar-fill{height:100%; border-radius:6px; transition:width 1s cubic-bezier(.16,1,.3,1);}
+.bar-val{font-size:12px; font-weight:800; text-align:right; font-variant-numeric:tabular-nums;}
+
+/* ============ ALERTS ============ */
+.alert-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+@media (max-width:900px){ .alert-grid{grid-template-columns:1fr;} }
+.alert-card{
+  border-radius:var(--radius); padding:18px; border:1px solid var(--border);
+  background:var(--surface); box-shadow:var(--shadow);
+  border-left:4px solid var(--accent);
+}
+.alert-card h4{margin:0 0 4px; font-size:13.5px; font-weight:800; display:flex; align-items:center; gap:8px;}
+.alert-card h4 svg{width:16px; height:16px; color:var(--accent);}
+.alert-count{font-size:26px; font-weight:800; margin:6px 0 8px; letter-spacing:-.5px;}
+.alert-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px;}
+.alert-list li{font-size:12px; color:var(--text-dim); font-weight:600; padding:6px 9px; background:var(--bg-soft); border-radius:8px; display:flex; justify-content:space-between; gap:8px;}
+.alert-list li span.tag{font-weight:700; color:var(--accent); flex-shrink:0;}
+.alert-empty{font-size:12px; color:var(--text-faint); font-style:italic;}
+
+/* ============ TABLE ============ */
+.table-controls{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center;}
+.search-box{
+  flex:1 1 240px; position:relative; display:flex; align-items:center;
+}
+.search-box svg{position:absolute; left:12px; width:15px; height:15px; color:var(--text-faint);}
+.search-box input{
+  width:100%; padding:10px 12px 10px 34px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font-size:13px; font-family:inherit; outline:none;
+  transition:border-color .15s;
+}
+.search-box input:focus{border-color:var(--teal);}
+.select-filter{
+  padding:10px 30px 10px 12px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font-size:12.5px; font-weight:600; font-family:inherit;
+  outline:none; cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%238C99AF'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 8px center; background-size:16px;
+}
+.result-count{font-size:12px; color:var(--text-faint); font-weight:700; white-space:nowrap;}
+
+.table-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;}
+.table-scroll{overflow-x:auto;}
+table{width:100%; border-collapse:collapse; font-size:12.5px; min-width:960px;}
+thead th{
+  text-align:left; padding:12px 14px; background:var(--bg-soft); color:var(--text-dim);
+  font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; font-weight:800;
+  border-bottom:1px solid var(--border); white-space:nowrap; cursor:pointer; user-select:none;
+  position:sticky; top:0;
+}
+thead th:hover{color:var(--teal);}
+thead th .arrow{opacity:.4; font-size:9px; margin-left:3px;}
+tbody tr{border-bottom:1px solid var(--border); cursor:pointer; transition:background .12s;}
+tbody tr:hover{background:var(--bg-soft);}
+tbody tr:last-child{border-bottom:none;}
+td{padding:12px 14px; vertical-align:middle; color:var(--text);}
+td.proyecto{font-weight:700; max-width:230px;}
+td.proyecto .cat-tag{display:block; font-size:10.5px; font-weight:700; color:var(--text-faint); margin-top:2px;}
+.badge{
+  display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px;
+  font-size:11px; font-weight:800; white-space:nowrap;
+}
+.badge .dot{width:6px; height:6px; border-radius:50%; flex-shrink:0;}
+.mini-track{width:86px; height:7px; border-radius:5px; background:var(--bg-soft); overflow:hidden;}
+.mini-fill{height:100%; border-radius:5px;}
+.mini-wrap{display:flex; align-items:center; gap:8px;}
+.mini-pct{font-weight:800; font-size:12px; font-variant-numeric:tabular-nums; width:32px;}
+.chev{color:var(--text-faint); transition:transform .15s;}
+tr.expanded .chev{transform:rotate(90deg);}
+.detail-row td{background:var(--bg-soft); padding:0;}
+.detail-inner{padding:16px 22px 20px 22px; display:none; font-size:12.5px; color:var(--text-dim); line-height:1.6;}
+.detail-inner.open{display:block;}
+.detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:700px){ .detail-grid{grid-template-columns:1fr;} }
+.detail-block h5{margin:0 0 5px; font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-faint); font-weight:800;}
+.detail-block p{margin:0 0 12px; color:var(--text);}
+.pipeline-mini{display:flex; align-items:center; gap:4px; margin-top:2px;}
+.pipeline-mini .seg{flex:1; height:5px; border-radius:3px; background:var(--bg-soft);}
+.pipeline-mini .seg.on{background:var(--teal);}
+
+footer{margin-top:56px; padding:22px 0 10px; text-align:center; font-size:11.5px; color:var(--text-faint); border-top:1px solid var(--border);}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important;}
+}
+</style>
+</head>
+<body data-theme="light">
+
+<noscript>
+  <div style="max-width:560px;margin:60px auto;padding:24px;border:2px solid #C8970A;border-radius:12px;background:#FFF8E8;color:#101B33;font-family:-apple-system,'Segoe UI',Arial,sans-serif;text-align:center;">
+    <strong>Este dashboard necesita JavaScript activo para mostrar los datos.</strong><br><br>
+    Si estás viendo esta página dentro de WhatsApp, Telegram, Google Drive o el visor de archivos de tu celular, esos suelen mostrar solo una vista previa estática.<br><br>
+    Guarda el archivo en tu teléfono y ábrelo directamente con <strong>Chrome</strong> (Android) o <strong>Safari</strong> (iPhone) para verlo funcionando por completo.
+  </div>
+</noscript>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">GIM</div>
+      <div class="brand-text">
+        <p class="eyebrow">ESAP · Subdirección Nacional de Gestión Corporativa</p>
+        <h1>Dashboard Ejecutivo de Proyectos ESAP</h1>
+        <p>Grupo de Infraestructura y Mantenimiento — seguimiento a la estructuración contractual</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="pill"><span class="dot"></span><span id="genDate">—</span></div>
+      <div class="theme-toggle" id="themeToggle">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <span id="themeLabel">Modo oscuro</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabnav">
+  <div class="tabnav-inner">
+    <button class="tab-btn active" data-tab="sede">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg>
+      Sede Central (ESAP)
+      <span class="tab-count" id="tabCountSede">—</span>
+    </button>
+    <button class="tab-btn" data-tab="territorial">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z"/><path d="M8 2v16M16 6v16"/></svg>
+      Territoriales
+      <span class="tab-count" id="tabCountTerritorial">—</span>
+    </button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ============================================================ -->
+  <!-- TAB 1: SEDE CENTRAL (ESAP)                                    -->
+  <!-- ============================================================ -->
+  <div class="tab-panel active" id="tab-sede">
+
+    <section class="section" style="padding-top:24px;">
+      <div class="pipeline-card">
+        <div class="pipeline-card-head">
+          <div>
+            <p class="eyebrow" style="color:#9FC2D9;">Embudo precontractual · Sede Central</p>
+            <h3>Ruta de estructuración de los proyectos de la Sede Central CAN</h3>
+          </div>
+        </div>
+        <div class="pipeline" id="sedePipelineBand"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Panorama general · Sede Central</p>
+          <h2>¿Cómo va todo? Un vistazo de 30 segundos</h2>
+        </div>
+      </div>
+      <div class="kpi-grid" id="sedeKpiGrid"></div>
+      <div class="info-strip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span><strong>¿Qué es el "avance documental"?</strong> Es el % de trámites, anexos, estudios y aprobaciones del proceso de contratación (anexo técnico, estudios previos, evaluaciones, adjudicación, acta de inicio) que ya están marcados como completos en el Excel de seguimiento. <u>No mide avance físico de obra ni ejecución presupuestal</u> — un proyecto en 100% ya agotó todo el trámite precontractual, y su estado real (ejecución, adjudicación, suspendido, etc.) se muestra aparte, en la insignia de "Estado".</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Estado del proceso</p>
+          <h2>Distribución y avance por tipo de proceso</h2>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>Proyectos por estado del proceso</h3><span class="hint" id="sedeDonutHint"></span></div>
+          <div id="sedeDonutEstado"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Avance documental promedio por tipo de proceso</h3><span class="hint">% de hitos cumplidos</span></div>
+          <div id="sedeBarGroup"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><p class="eyebrow">Detalle de avance</p><h2>Fases del embudo precontractual</h2></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Proyectos por fase del embudo precontractual</h3><span class="hint">según % de avance documental</span></div>
+        <div id="sedeBarFase"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><p class="eyebrow">Ranking</p><h2>Proyectos con mayor avance documental</h2></div>
+      </div>
+      <div class="card"><div id="sedeTopRanking"></div></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><p class="eyebrow">Alertas de gestión</p><h2>Puntos que requieren atención — Sede Central</h2></div>
+      </div>
+      <div class="alert-grid" id="sedeAlertGrid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Detalle operativo</p>
+          <h2>Tablero de proyectos — Sede Central</h2>
+          <p>Busca, filtra y despliega cada proyecto para ver objeto, observaciones y compromisos.</p>
+        </div>
+        <span class="result-count" id="sedeResultCount"></span>
+      </div>
+      <div class="table-controls">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="sedeSearchInput" placeholder="Buscar por proyecto, objeto o responsable…">
+        </div>
+        <select class="select-filter" id="sedeFilterGroup"><option value="">Todos los tipos de proceso</option></select>
+        <select class="select-filter" id="sedeFilterEstado"><option value="">Todos los estados</option></select>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table id="sedeTable">
+            <thead>
+              <tr>
+                <th data-sort="proyecto">Proyecto <span class="arrow">↕</span></th>
+                <th data-sort="tipo_proceso">Tipo de proceso <span class="arrow">↕</span></th>
+                <th data-sort="avance" title="% de trámites y aprobaciones del proceso de contratación ya completos">Avance documental <span class="arrow">↕</span></th>
+                <th data-sort="estado">Estado <span class="arrow">↕</span></th>
+                <th data-sort="tecnico">Técnico</th>
+                <th data-sort="valor">Valor proceso</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="sedeTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /tab-sede -->
+
+  <!-- ============================================================ -->
+  <!-- TAB 2: TERRITORIALES                                          -->
+  <!-- ============================================================ -->
+  <div class="tab-panel" id="tab-territorial">
+
+    <section class="section" style="padding-top:24px;">
+      <div class="pipeline-card" style="background:linear-gradient(135deg, var(--navy-deep) 0%, #123a82 100%);">
+        <div class="pipeline-card-head">
+          <div>
+            <p class="eyebrow" style="color:#9FC2D9;">Recursos de infraestructura por territorial</p>
+            <h3>Asignación de hasta $100 millones por Dirección Territorial</h3>
+          </div>
+        </div>
+        <p class="pipeline-intro">Respecto al proceso correspondiente a la asignación de los recursos de hasta <strong>$100 millones por territorial</strong>, se informa que ya se surtieron las fases iniciales. Se remitieron a todas las Direcciones Territoriales los lineamientos, borradores de los anexos técnicos y las plantillas requeridas para adelantar los procesos de contratación, con mesas de trabajo y jornadas de acompañamiento técnico permanente para orientar la estructuración de las necesidades prioritarias.</p>
+        <p class="pipeline-intro" style="margin-top:10px;">Como resultado, varias Direcciones Territoriales ya adelantan sus procesos de contratación para la adquisición e instalación de equipos UPS, sistemas de aire acondicionado y demás necesidades urgentes identificadas en cada sede, cada una con un líder designado. De manera complementaria, la ESAP avanza en proyectos de mayor alcance: cubiertas, fachadas, sistemas eléctricos y redes hidrosanitarias.</p>
+        <div class="pipeline" id="terrPipelineBand" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <div class="subsection-divider"><span class="tag">① Procesos de contratación GIM</span><div class="line"></div></div>
+
+    <section class="section" style="padding-top:8px;">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Panorama general · Territoriales</p>
+          <h2>Proyectos territoriales en trámite de contratación</h2>
+          <p>Fuente: SEGUIMIENTO_DE_PROYECTOS.xlsx — Direcciones Territoriales (GIM) + Ejecución Directa Territorial.</p>
+        </div>
+      </div>
+      <div class="kpi-grid" id="terrProyKpiGrid"></div>
+    </section>
+
+    <section class="section">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>Proyectos por estado del proceso</h3><span class="hint" id="terrProyDonutHint"></span></div>
+          <div id="terrProyDonutEstado"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Avance documental promedio por modalidad</h3><span class="hint">estructurado por GIM vs. ejecutado directamente</span></div>
+          <div id="terrProyBarGroup"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <div class="card-head"><h3>Proyectos por fase del embudo precontractual</h3><span class="hint">según % de avance documental</span></div>
+        <div id="terrProyBarFase"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><p class="eyebrow">Ranking</p><h2>Proyectos territoriales con mayor avance documental</h2></div></div>
+      <div class="card"><div id="terrProyTopRanking"></div></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><p class="eyebrow">Alertas de gestión</p><h2>Puntos que requieren atención — Territoriales</h2></div></div>
+      <div class="alert-grid" id="terrProyAlertGrid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Detalle operativo</p>
+          <h2>Tablero de proyectos — Territoriales</h2>
+        </div>
+        <span class="result-count" id="terrProyResultCount"></span>
+      </div>
+      <div class="table-controls">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="terrProySearchInput" placeholder="Buscar por proyecto, objeto o responsable…">
+        </div>
+        <select class="select-filter" id="terrProyFilterGroup"><option value="">Todas las modalidades</option></select>
+        <select class="select-filter" id="terrProyFilterEstado"><option value="">Todos los estados</option></select>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table id="terrProyTable">
+            <thead>
+              <tr>
+                <th data-sort="proyecto">Proyecto <span class="arrow">↕</span></th>
+                <th data-sort="categoria">Modalidad <span class="arrow">↕</span></th>
+                <th data-sort="avance" title="% de trámites y aprobaciones del proceso de contratación ya completos">Avance documental <span class="arrow">↕</span></th>
+                <th data-sort="estado">Estado <span class="arrow">↕</span></th>
+                <th data-sort="tecnico">Técnico</th>
+                <th data-sort="valor">Valor proceso</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="terrProyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="subsection-divider"><span class="tag">② Seguimiento cualitativo por Dirección Territorial</span><div class="line"></div></div>
+
+    <section class="section" style="padding-top:8px;">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Panorama territorial</p>
+          <h2>Estado de las 15 Direcciones Territoriales / agrupaciones</h2>
+          <p>Fuente: Cuadro_de_avance_territorial.docx — clasificación consolidada por el Grupo de Infraestructura y Mantenimiento.</p>
+        </div>
+      </div>
+      <div class="kpi-grid" id="terrKpiGrid"></div>
+    </section>
+
+    <section class="section">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>Territoriales por nivel de avance</h3><span class="hint">15 territoriales / agrupaciones</span></div>
+          <div id="donutTerritorial"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Última fecha de seguimiento reportada</h3><span class="hint">por territorial</span></div>
+          <div id="terrTimeline" style="max-height:340px; overflow-y:auto; padding-right:4px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Detalle</p>
+          <h2>Seguimiento por territorial</h2>
+          <p>Busca por territorial o filtra por nivel de avance.</p>
+        </div>
+        <span class="result-count" id="terrResultCount"></span>
+      </div>
+      <div class="table-controls">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="terrSearchInput" placeholder="Buscar por territorial…">
+        </div>
+        <select class="select-filter" id="terrFilterNivel"><option value="">Todos los niveles</option></select>
+      </div>
+      <div class="terr-cards" id="terrCards"></div>
+    </section>
+
+    <section class="section" style="padding-bottom:10px;">
+      <div class="note-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>Los textos de seguimiento cualitativo se muestran tal como están registrados en <strong>Cuadro_de_avance_territorial.docx</strong>. Algunas frases del documento original tienen palabras incompletas (p. ej. cortes de línea al copiar/pegar); si quieres, puedo ayudarte a revisar y pulir esos textos en la fuente.</span>
+      </div>
+    </section>
+
+  </div><!-- /tab-territorial -->
+
+  <footer>
+    Dashboard generado a partir de <strong>SEGUIMIENTO_DE_PROYECTOS.xlsx</strong> y <strong>Cuadro_de_avance_territorial.docx</strong> · Grupo de Infraestructura y Mantenimiento · ESAP — documento de apoyo a la toma de decisiones, sin conexión a internet requerida.
+  </footer>
+</div>
+
+<script>
+const ALL_DATA = [{"categoria": "Sede Central", "proyecto": "Biblioteca", "tecnico": "Walter", "juridico": "Pio", "abogado": "Laverde", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "REALIZAR LA ADECUACIÓN Y MEJORAMIENTO LOCATIVO DE LA BIBLIOTECA DE LA SEDE CENTRAL CAN DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE FUNCIONAMIENTO, SEGURIDAD Y PRESTACIÓN DEL SERVICIO BIBLIOTECARIO.", "valor": 708703723.0, "avance": 100, "fase": "Completado (fase precontractual)", "estado": "En ejecución", "observaciones": "EN EJECUCION", "compromisos": "", "dependencia": "EJECUCION GIM"}, {"categoria": "Sede Central", "proyecto": "Hidrosanitario", "tecnico": "Juliana", "juridico": "Alberto", "abogado": "Betsy Carolina", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "CONTRATAR EL MANTENIMIENTO Y MEJORAMIENTO DEL SISTEMA HIDROSANITARIO Y PLUVIAL DE LAS INSTALACIONES DE LA ESAP – SEDE CENTRAL", "valor": 772974348, "avance": 96, "fase": "Evaluación / adjudicación", "estado": "En adjudicación", "observaciones": "EN ADJUDICACION", "compromisos": "", "dependencia": "EN PROCESO DE FIRMA DE ACTA DE INICIO"}, {"categoria": "Sede Central", "proyecto": "Espacios Deportivos", "tecnico": "Juliana", "juridico": "Valentina", "abogado": "Maria Fernanda", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "REALIZAR EL MANTENIMIENTO, EL MEJORAMIENTO Y LA MODERNIZACIÓN DE LOS ESCENARIOS DEPORTIVOS DE LA SEDE CENTRAL DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA.", "valor": 678723618.0, "avance": 89, "fase": "Evaluación / adjudicación", "estado": "En evaluación", "observaciones": "EN EVALUACION", "compromisos": "", "dependencia": "PUBLICADO INFORME FINAL A ESPERA DE OBSERVACIONES CONTRATACION"}, {"categoria": "Sede Central", "proyecto": "Pasillos", "tecnico": "Juliana", "juridico": "Saul", "abogado": "Laverde", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "REALIZAR EL MANTENIMIENTO PREVENTIVO Y CORRECTIVO INTEGRAL DE LAS ÁREAS COMUNES DE CIRCULACIÓN EXISTENTES ENTRE LAS DIFERENTES ÁREAS ACADÉMICAS Y ADMINISTRATIVAS DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, SEDE CENTRAL, QUE GARANTICE CONDICIONES TÉCNICAS DE ACCESIBILIDAD, SEGURIDAD Y FUNCIONALIDAD", "valor": 769942011, "avance": 91, "fase": "Evaluación / adjudicación", "estado": "En adjudicación", "observaciones": "EN ADJUDICACION", "compromisos": "", "dependencia": "EN PROCESO DE FORMALIZACION DEL CONTRATO - CONTRATACION"}, {"categoria": "Sede Central", "proyecto": "Paisajismo", "tecnico": "Camilo Barrios", "juridico": "Valentina", "abogado": "Daniela Venegas", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "EJECUTAR LA ADECUACIÓN, MEJORAMIENTO E IMPLEMENTACIÓN DEL PROYECTO DE PAISAJISMO Y ZONAS DURAS EN LA SEDE CENTRAL DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP.", "valor": null, "avance": 41, "fase": "Estudios y validación", "estado": "En ajustes", "observaciones": "EN AJUSTE POR PARTE DE GIM", "compromisos": "", "dependencia": "AJUSTE GIM"}, {"categoria": "Sede Central", "proyecto": "Torniquetes", "tecnico": "John Fredy Y Ximena", "juridico": "Alberto", "abogado": "Erika Astrid Mendez", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "MODERNIZACIÓN DEL SISTEMA DE CONTROL DE ACCESO PEATONAL MEDIANTE LA REPOSICIÓN E IMPLEMENTACIÓN DE EQUIPOS TECNOLÓGICOS - ESAP SEDE CENTRAL", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "Suspendido", "observaciones": "Congelado por el contrato de año pasado por solicitud del coodinador", "compromisos": "", "dependencia": "A ESPERA DE ACCIONES  POR PROCESO TUPEON , CONTRATO 2025"}, {"categoria": "Sede Central", "proyecto": "Talanqueras", "tecnico": "John Fredy Y Ximena", "juridico": "Alberto", "abogado": "Yulybeth Yuliana Villazon", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "EJECUCIÓN DE OBRAS DE ADECUACIÓN DEL ACCESO VEHICULAR Y ZONAS DE PARQUEO, INCLUYENDO LA MODERNIZACIÓN DEL SISTEMA DE CONTROL Y LA OPTIMIZACIÓN DE SUS CONDICIONES OPERATIVAS Y FUNCIONALES.", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "Suspendido", "observaciones": "Congelado por el contrato de año pasado por solicitud del coodinador", "compromisos": "", "dependencia": "A ESPERA DE ACCIONES  POR PROCESO TUPEON , CONTRATO 2025"}, {"categoria": "Sede Central", "proyecto": "Cerramiento", "tecnico": "Esteban", "juridico": "Saul", "abogado": "Maria Jose Polanco", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "REALIZAR EL MEJORAMIENTO Y ADECUACIÓN DEL CERRAMIENTO PERIMETRAL DE LA SEDE CENTRAL CAN DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, CON EL FIN DE GARANTIZAR CONDICIONES ADECUADAS DE SEGURIDAD, DELIMITACIÓN Y PROTECCIÓN DE LA INFRAESTRUCTURA INSTITUCIONAL", "valor": null, "avance": 8, "fase": "Estructuración inicial", "estado": "En ajustes", "observaciones": "El documento se encuentra en ajuste de as ultimas observacioones remitidas por contratacion", "compromisos": "SE REMITIRA A CONTRATACION CON LOS AJUSTES SOLICITADOS EL DIA 22 DE JULIO DEL 2026, PARA REVISION FINAL", "dependencia": "EN REVISION DE FINANCIERA"}, {"categoria": "Sede Central", "proyecto": "Parque Solar", "tecnico": "John Fredy Y Ximena", "juridico": "Alberto", "abogado": "Angelica Maria Escobar", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "IMPLEMENTACIÓN DE UN SISTEMA SOLAR FOTOVOLTAICO HÍBRIDO EN LA SEDE CENTRAL CAN, ORIENTADO AL MEJORAMIENTO ENERGÉTICO INSTITUCIONAL.", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Se remite a contratacion el 16 de julio para revision de contratacion, para ser publicado el evento de cotizacion", "compromisos": "", "dependencia": "A ESPERA DEL PROCESO GIMNACION - GIM"}, {"categoria": "Sede Central", "proyecto": "Huerta", "tecnico": "Ximena", "juridico": "Valentina", "abogado": "Maria Daniela Vargas", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "CONTRATAR LA INTERVENCIÓN INTEGRAL PARA LA CREACIÓN DE LA HUERTA INSTITUCIONAL DE LA SEDE CENTRAL CAN DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP", "valor": null, "avance": 7, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Ya tiene evento de cotizacion, solo cotizo 1 empresa  , Falta una cotizacion para proceder a elaborar el estudio de mercado", "compromisos": "ENTREGA DOS COTIZACION  COTIZACIONES EL DIA 22 JUILIO DE L2026", "dependencia": "A ESPERA DE COTIZACIONES ADICIONALES PARA PROCEDER CON EL ESTUDIO DE MERCADO - GIM"}, {"categoria": "Sede Central", "proyecto": "Mantenimiento De Ascensores Y Rampas De Movilidad Reducida", "tecnico": "John Fredy Y Ximena", "juridico": "Saul", "abogado": "Yulybeth Yuliana Villazon", "tipo_proceso": "Minima", "objeto": "MANTENIMIENTO PREVENTIVO Y CORRECTIVO DE LOS ASCENSORES Y PLATAFORMA DE MOVILIDAD REDUCIDA, SEDE CENTRAL GARANTIZANDO SU OPERATIVIDAD, SEGURIDAD Y CONTINUIDAD EN LA PRESTACIÓN DEL SERVICIO.", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Ya tiene evento de cotizacion, solo cotizo 1 empresa  , Falta una cotizacion para proceder a elaborar el estudio de mercado", "compromisos": "ENTREGA UNA COTIZACIONES  COTIZACION EL DIA 22 JUILIO DE L2026", "dependencia": "A ESPERA DE COTIZACIONES ADICIONALES PARA PROCEDER CON EL ESTUDIO DE MERCADO - GIM"}, {"categoria": "Sede Central", "proyecto": "Ferreteria", "tecnico": "Walter", "juridico": "Valentina", "abogado": "Sin asignar", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "ADQUISICIÓN DE BIENES Y SERVICIOS- SEDES MANTENIDAS-CONSOLIDACIÓN DE LA CAPACIDAD FÍSICA INSTALADA PARA LA PRESTACIÓN ADECUADA DEL SERVICIO PARA LAS FUNCIONES ACADÉMICAS, FORMATIVAS Y ADMINISTRATIVAS DE LA ESAP NACIONAL", "valor": 164800000, "avance": 50, "fase": "Estudios y validación", "estado": "Sin información", "observaciones": "Sin observaciones registradas", "compromisos": "", "dependencia": "EN EJECUCION"}, {"categoria": "Sede Central", "proyecto": "Abejas", "tecnico": "Marianella", "juridico": "Saul", "abogado": "Sin asignar", "tipo_proceso": "Minima", "objeto": "REALIZAR EL RESCATE, MANEJO Y REUBICACIÓN DE ABEJAS AFRICANIZADAS DENTRO DE LAS INSTALACIONES DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, SEDE CENTRAL, GARANTIZANDO SU EXTRACCIÓN EN CONDICIONES SEGURAS, SU RESCATE CON VIDA Y LA MITIGACIÓN DEL RIESGO PARA LA COMUNIDAD EDUCATIVA, ADMINISTRATIVA Y VISITANTES.", "valor": 3621951, "avance": 14, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "En proyeccion de estudios previos y demas documentos", "compromisos": "", "dependencia": "EN JUSTES GIM"}, {"categoria": "Sede Central", "proyecto": "Mantenimiento De Aire Acondicionado", "tecnico": "John Fredy Y Ximena", "juridico": "Saul", "abogado": "Sin asignar", "tipo_proceso": "Minima", "objeto": "REALIZAR EL MANTENIMIENTO PREVENTIVO Y CORRECTIVO DE LOS SISTEMAS DE AIRE ACONDICIONADO INSTALADOS EN LAS SEDES CENTRAL CAN, TEUSAQUILLO Y ROSALES DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA —ESAP—, GARANTIZANDO SU OPERACIÓN SEGURA, CONTINUA Y EFICIENTE,", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Observaciones por parte de conatratacion 7 julio", "compromisos": "AJUSTE DE OBSERVACIONES REALIZADAS POR CONTRATACION VIERNES 17 DE JULIO", "dependencia": "EN JUSTES GIM"}, {"categoria": "Sede Central", "proyecto": "Mantenimiento De Ups", "tecnico": "John Fredy Y Ximena", "juridico": "Alberto", "abogado": "Betsy Carolina", "tipo_proceso": "Minima", "objeto": "REALIZAR EL MANTENIMIENTO PREVENTIVO Y CORRECTIVO DE LOS SISTEMAS DE ALIMENTACIÓN ININTERRUMPIDA —UPS— INSTALADOS EN LAS SEDES CENTRAL CAN, TEUSAQUILLO Y ROSALES DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA —ESAP—, GARANTIZANDO SU OPERACIÓN SEGURA, CONTINUA Y EFICIENTE.", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Observaciones por parte de conatratacion 7 julio", "compromisos": "AJUSTE DE OBSERVACIONES REALIZADAS POR CONTRATACION VIERNES 17 DE JULIO", "dependencia": "APROBADO POR CONTRATCION PARA PUBLICAR EVENTO DE COTIZACION POR FINANCIERA"}, {"categoria": "Sede Central", "proyecto": "Mantenimientos De Cubiertas", "tecnico": "Andres", "juridico": "Valentina", "abogado": "Erika Astrid Mendez", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "Realizar el mantenimiento integral de las cubiertas de la Sede Central CAN de la ESAP", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "En estructuracion de anexo tecnico y plantilla de cotizacion", "compromisos": "SE REMITIRA EL 17 DE JULIO A FINACIERA PARA REVISION", "dependencia": "ESTRUCTURACION EQUIPO GIIM"}, {"categoria": "Sede Central", "proyecto": "Camaras Sede Can Y Villavicencio", "tecnico": "John Fredy Y Ximena", "juridico": "Valentina", "abogado": "Luz Marlen Bula", "tipo_proceso": "Minima", "objeto": "", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Ya cuenta con estudio de mercado, 1.  Falta la solicitud a finaciera para quitar los items de villavicencio. 2. Falta de estructuracion de los documentos para la publicacion", "compromisos": "1. VIERNES 17 DE JULIO SE REMITIRA LA SOLICITUD A FINACIERA PARA SACR LOS ITEMS DE VILLAVIDENCIO 2. AGOSTO 10 ENVIO DE DOCUMENTOS PARA REVISION DE FINANCIERA Y CONTRATACION PARA PUBLICACION DEL PROCESO", "dependencia": "CON ESTUDIO DE MERCADO INICA ESTRUCTURACION DE DOCUMENTO PARA PUBLICACION DEL PROCESO - GIM"}, {"categoria": "Sede Central", "proyecto": "Modernicacion De Sistema De Generacion Sistema Electrico Sede Central", "tecnico": "John Fredy Y Ximena", "juridico": "Valentina", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Ya se encuentra en estructuracion de anexo tecnico y plantilla de cotizacion", "compromisos": "REMISION DE LOS DOCUMENTOS PROCESO DE COTIZACION EL DIA 21 DE JULIO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Sede Central", "proyecto": "Construccion Gimnasio", "tecnico": "Andres Rodriguez", "juridico": "Valentina", "abogado": "Sin asignar", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "Realizar el suministro, instalación, configuración, integración, pruebas, puesta en funcionamiento y entrega operativa de los sistemas de circuito cerrado de televisión (CCTV) para las sedes ESAP Villavicencio sede nueva y sede central Bogotá, garantizando condiciones adecuadas de seguridad, monitoreo, seguimiento operativo y control institucional.", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En ajustes", "observaciones": "Esta en proyeccion del equpo GIM, Ajuste de diseños", "compromisos": "REMISION DE LOS DOCUMENTOS PROCESO DE COTIZACION EL DIA 24 DE JULIO", "dependencia": "ESTRUCTURACION EQUIPO GIIM"}, {"categoria": "Sede Central", "proyecto": "Cafeteria", "tecnico": "Andres Rodriguez Y Esteban Medrano", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Ya se encuentra en estructuracion de anexo tecnico y plantilla de cotizacion", "compromisos": "REMISION DE LOS DOCUMENTOS PROCESO DE COTIZACION EL DIA 14 DE AGOSTO", "dependencia": "ESTRUCTURACION EQUIPO GIIM"}, {"categoria": "Sede Central", "proyecto": "Dotacion", "tecnico": "Duberly", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Esta en proyeccion del equpo GIM, revision parte juridica", "compromisos": "REMISION DE LOS DOCUMENTOS PROCESO DE COTIZACION EL DIA 17 DE JULIO", "dependencia": "EN JUSTES GIM"}, {"categoria": "Sede Central", "proyecto": "Sistematizacion De Ingresos Internos", "tecnico": "John Fredy Y Ximena", "juridico": "Alberto", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Estan estructurados los documentos para proceso de cotizacion, pero econtratacion devolvio el 9 julio ibndicando que debe ser aprobado por OTIC", "compromisos": "SE REMITIRA CORREO A OTIC EL 15 JULIO", "dependencia": "OTIC PENDIENTE VISTO BUENO"}, {"categoria": "Sede Central", "proyecto": "Dotacion Gimnasio", "tecnico": "Camilo Barrios", "juridico": "Valentina", "abogado": "Sin asignar", "tipo_proceso": "Subasta Inversa", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "EN ESTRUCTURACION", "compromisos": "", "dependencia": "A ESPERA DEL PROCESO GIMNACION - GIM"}, {"categoria": "Sede Central", "proyecto": "Terrazas Verdes", "tecnico": "Jony", "juridico": "Valentina", "abogado": "Sin asignar", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "En proyeccion final para remicion a financiera", "compromisos": "REMISION DE LOS DOCUMENTOS PROCESO DE COTIZACION EL DIA 24 DE JULIO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Sede Central", "proyecto": "Dotacion A Biblioteca", "tecnico": "Camilo Barrios", "juridico": "Saul", "abogado": "Sin asignar", "tipo_proceso": "Subasta Inversa", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "En proyeccion final para remicion a financiera", "compromisos": "REMISION DE LOS DOCUMENTOS PROCESO DE COTIZACION EL DIA 21 DE JULIO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Sede Central", "proyecto": "Auditorio Dentro De Biblioteca", "tecnico": "Esteban", "juridico": "Saul", "abogado": "Sin asignar", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "Por definir", "observaciones": "eSTABLECER SI EL PROYECTO SE ACTIVA", "compromisos": "REUNION CON EL COODINADOR PARA DEFINIR ACCIONES EL 17  DE JULIO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Sede Central", "proyecto": "Lavado De Tanques", "tecnico": "Marianella Y Duberly", "juridico": "Valentina", "abogado": "Sin asignar", "tipo_proceso": "Minima", "objeto": "", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Aprobado por finaciera y Eviado a contratacion el dia 9 de julio, a espera de observaciones", "compromisos": "", "dependencia": "EN PUBLICACION EL EVENTO DE COTIZACION POR FINANCIERA"}, {"categoria": "Sede Central", "proyecto": "Mantenimiento Fachada", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "Minima", "objeto": "", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "Suspendido", "observaciones": "STAND BY", "compromisos": "", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Popayan", "tecnico": "Juliana", "juridico": "Saul", "abogado": "Sin asignar", "tipo_proceso": "Licitacion Publica", "objeto": "“REALIZAR EL MANTENIMIENTO, ADECUACIÓN Y MEJORAMIENTO DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL POPAYÁN DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, PARA GARANTIZAR CONDICIONES DE SEGURIDAD, FUNCIONALIDAD Y ADECUADO USO DE LAS INSTALACIONES”", "valor": 2054343865, "avance": 29, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "En revision  de los documentos de la obra y en proyeccion de los documentos de estudio de mercado de interventoria", "compromisos": "REMISION A CONTRACION EL 17 DE JULIO", "dependencia": "CONTRATACION: OBRA + INTERVENTORIA"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Fumigacion", "tecnico": "Marianella Y Duberly", "juridico": "Valentina", "abogado": "Sin asignar", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "PRESTAR EL SERVICIO INTEGRAL DE MANEJO DE PLAGAS Y DESINFECCIÓN EN LAS SEDES TERRITORIALES DE LA ESAP A NIVEL NACIONAL, CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SALUBRIDAD, BIOSEGURIDAD, PROTECCIÓN DE LA COMUNIDAD INSTITUCIONAL Y CONSERVACIÓN DE LOS BIENES DE LA ENTIDAD.\"", "valor": null, "avance": 4, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "Se encuentra en elaboracion del estudio de mercado por parte de financiero, semitio el dia 10 de julio. a espera de observaciones", "compromisos": "", "dependencia": "EN ESTRUCTURACION EQUIPO GIM  Y SOLICITUD DE CDP"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Regarga De Extintores", "tecnico": "Marianella", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "Minima", "objeto": "REALIZAR LA REVISIÓN, MANTENIMIENTO, SEÑALIZACIÓN,\nETIQUETADO, CARGA Y/O COMPRA DE LOS EXTINTORES DE LA ESCUELA SUPERIOR\nDE ADMINISTRACIÓN PÚBLICA - ESAP A NIVEL NACIONAL.", "valor": null, "avance": 23, "fase": "Estructuración inicial", "estado": "En estructuración", "observaciones": "A espera de que contratacion publique el proceso", "compromisos": "", "dependencia": "PUBLICADO PROCESO EN SECOP POR CONTRATACION"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Adquisicion De Ascensor Bucaramanga Y Manizales", "tecnico": "John Fredy Y Ximena", "juridico": "Alberto", "abogado": "Sin asignar", "tipo_proceso": "Selección Abreviada De Menor Cuantia", "objeto": "Realizar el suministro, instalación, modernización, desmonte, adecuaciones, pruebas y puesta en funcionamiento de los ascensores de las sedes ESAP Manizales y Bucaramanga, garantizando su operación segura, continua y eficiente", "valor": null, "avance": 5, "fase": "Estructuración inicial", "estado": "En ajustes", "observaciones": "Revisado por contratacion el 09 de junio, se deben remitir los ajustes", "compromisos": "SE REMITIRAN LOS AJUSTES EL 15 DE JULIO 2026", "dependencia": "FINANCIERA EN EVENTO DE COTIZACION"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Sala De Egresados Fusagasuga", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "En estructuracion de los documento para el evento de cotizacion", "compromisos": "SERAN REMITIDOS A CONTRATACION EL 31 DE JULIO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Medellín", "tecnico": "Camilo Barrios", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL MEDELLÍN – DIRECCIÓN TERRITORIAL ANTIOQUIA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Ausencia y deficiencia de uliminacion; 2) Inexistencia de rampa para acceso; 3) Baños sin adeciaciones para personas con discapacidad, mantemientos  y accesorios; 4) Deficiencias en sistema hidrosanitarios; 5) Deficiencia en cerramientos; 6) Deterioro de cubiertas con filtraciones de agua; 7) Ingreso de palomas por falta de cerramientos en puntos fijo y falta de rejas cubierta; 8) Equipos de aires acondicionados en mal estado; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "En estructuracion de los documento para el evento de cotizacion", "compromisos": "SERAN REMITIDOS A CONTRATACION EL 31 DE AGOSTO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Barranquilla", "tecnico": "Ximena", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL BARRANQUILLA – DIRECCIÓN TERRITORIAL ATLÁNTICO – MAGDALENA – CESAR – LA GUAJIRA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Sustituir sillas actuales por mobiliario ergonómico certificado; 2) Realizar poda preventiva y mantenimiento periódico; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 15 DESEPTIEMBRE", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Cartagena Y Sincelejo", "tecnico": "Ximenena Y Andres", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL CARTAGENA Y SINCELEJO – DIRECCIÓN TERRITORIAL BOLÍVAR – CÓRDOBA – SUCRE – SAN ANDRÉS DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Reinstalar y asegurar el sistema de cielo raso en el hall de acceso.; 2) Diseñar y construir una solución de contención estructural en la zona posterior.; 3) Ejecutar mantenimiento integral de acabados en toda la sede.; 4) Reparar o reemplazar las canaletas de cubierta y revisar el sistema de drenaje.; 5) Realizar la demarcación horizontal del parqueadero.; 6) Adecuar un espacio para cafetería e instalar puntos de hidratación.; 7) Reparar y poner en funcionamiento el ascensor para personas con discapacidad.; 8) Implementar señalización integral y renovar el punto de encuentro.; 9) Realizar mantenimiento correctivo a los aparatos sanitarios.; 10) Ejecutar mantenimiento o reemplazo de los equipos de aire acondicionado central.; 11) Reparar o reemplazar la UPS del área técnica.; 12) Cubiertas, Bajanates y canales; 13) Parqueaderos, areas sociales; 14) cerramiento y zonas verdes; 15) cafeteria y sala de docentes; 16) muros internos y externos; 17) sistemas hidrosanitarios y redes hidraulicas; 18) sistemas hidrosanitarios y redes hidraulicas; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones - CARTAGENA \n\nPendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones - SINCELEJO", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 15 DESEPTIEMBRE  - CARTAGENA\n\nSE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 15 DESEPTIEMBRE  - SINCELEJO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Manizales", "tecnico": "Esteban", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL MANIZALES – DIRECCIÓN TERRITORIAL CALDAS DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Mantenimiento, actividades de impermeabilización; 2) Sobrecarga en la red electrica; 3) Ascensor; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 15 DESEPTIEMBRE", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Fusagasugá", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL FUSAGASUGÁ – DIRECCIÓN TERRITORIAL CUNDINAMARCA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) se requiere cambio de luminarias, mantenimiento de UPS Y Aire acondicionado; 2) Se requiere arreglo de pavimentacion zona de parqueo, se debe realizar reacondicionamiento de las rampas de acceso peatonal para personas con discapacidad Instalacion de Barandas en la zona; 3) Muro de contencion, del cerramiento perimetral; 4) mantenimiento de cajas de inspeccion y arreglo y cambio de unidades hidrosanitarios toda la sede; 5) 1,arreglos y cambio de cubierta del auditorio   2, adecuacion del espacio de archivo y oficina de puesto de trabajo para personas administrativas; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 15 DE SEPTIEMBRE", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Pasto", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL PASTO – DIRECCIÓN TERRITORIAL NARIÑO – ALTO PUTUMAYO DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Aguas Subterráneas; 2) 1 Cambio total de manta asfáltica en la totalidad de las cubiertas. 2 Impermeabilización de terrazas                                                                                                                                                                                                                        3 instalación de flanches perimetrales en toda la cubierta.   4. Mantenimiento de humedades; 3) Instalaciones Eléctricas – Salas de Cómputo y UPS – Instalación y Mantenimiento, dos moto Bombas; 4) Mantenimiento integral de la sede; 5) Intervencion Inmueble La Casona (PATRIMONIO CULTURAL Y ARQUITECTÓNICO); CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 24 DE SEPTIEMBRE", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Cúcuta", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL CÚCUTA – DIRECCIÓN TERRITORIAL NORTE DE SANTANDER – ARAUCA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Cubiertas, Canales y Control de Filtraciones (Prioridad Alta); 2) Redes hidrosanitarias y Manejo de Aguas Pluviales y Desagües; 3) Carpintería, Cerrajería y Control de Plagas, Seguridad Física, Cerramiento y Señalización, Obras Locativas, Espacios Comunes y Acabados; 4) Redes Eléctricas, Iluminación y Climatización; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 30 DE SEPTIEMBRE", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Bucaramanga", "tecnico": "Camilo Barrios", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL BUCARAMANGA – DIRECCIÓN TERRITORIAL SANTANDER DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Ascensor; 2) Inundacion poceta cubierta y filtraciones de agua en el perimetro de la cubierta; 3) Equipos de aires acondicionados en mal estado; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 15 DE AGOSTO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Ibagué", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN INTEGRAL DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL IBAGUÉ – DIRECCIÓN TERRITORIAL TOLIMA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Cubierta y cielo razo Auditorio y segundo piso; 2) Toda la parte de equipos hidrosanitarios, tuberias de redes de alcantarillado y cajas de inspeccion; 3) Zona de parqueadero y zona exterior de la ESAP; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD, ACCESIBILIDAD Y PRESTACIÓN ADECUADA DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 10 DE SEPTIEMBRE", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Choco", "tecnico": "Ximena Y Walter", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 15 DE SEPTIEMBRE", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial Valle Del Cauca", "tecnico": "Camilo Barrios", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "En estructuracion de los documento para el evento de cotizacion", "compromisos": "SERAN REMITIDOS A CONTRATACION EL 31 DE AGOSTO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorial San Andres", "tecnico": "Ximena Y John Fredy", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 15 DE SEPTIEMBRE", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Direcciones Territoriales (GIM)", "proyecto": "Mejoramiento Y Mantenimiento Integral Sede Territorialquindio Armenia", "tecnico": "Andres", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "Pendiente estructuracion de documentos para evento de cotizacion y pririzacion de intervenciones", "compromisos": "SE REMITIRAN LOS DOCUMENTOA CONTRACION DEL 31 DE AGOSTO", "dependencia": "EN ESTRUCTURACION EQUIPO GIM"}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Barranquilla – Ejecución Territorial", "tecnico": "Ximena", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL BARRANQUILLA – DIRECCIÓN TERRITORIAL ATLÁNTICO – MAGDALENA – CESAR – LA GUAJIRA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Realizar intervención para detener la humedad mediante revisión de fuentes de filtración e implementación de soluciones de impermeabilización y ventilación; 2) Reparar o reemplazar el sistema motorizado de la puerta del parqueadero; 3) Reemplazar tubería afectada e implementar medidas preventivas contra intrusión de raíces; 4) Instalar sistema de videovigilancia; 5) Adecuar zona verde identificada como parqueadero para motos, previo diseño técnico; 6) Evaluar la viabilidad técnica de ampliar vano existente y adecuar una puerta adicional en la sala de juntas; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 18 JUNIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO UE REMITIR LOS FORMATO QUE  YA FUERON REMITIDOS", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 16 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Cartagena – Ejecución Territorial", "tecnico": "Ximena", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL CARTAGENA – DIRECCIÓN TERRITORIAL BOLÍVAR – CÓRDOBA – SUCRE – SAN ANDRÉS DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Reemplazar la tubería del sistema de aire acondicionado y corregir los puntos de filtración identificados.; 2) Realizar evaluación técnica de la grieta existente y ejecutar las reparaciones necesarias.; 3) Reponer e instalar las luminarias dañadas o faltantes.; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 18 JUNIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO UE REMITIR LOS FORMATO QUE  YA FUERON REMITIDOS", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 16 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Tunja – Ejecución Territorial", "tecnico": "Esteban", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL TUNJA – DIRECCIÓN TERRITORIAL BOYACÁ – CASANARE DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Mantenimiento en cielo raso y paredes; 2) Filtraciones- hueco en piso al frente del cuarto de de aseo; 3) Inabilitacion de sifon en cocineta; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 18 JUNIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO UE REMITIR LOS FORMATO QUE  YA FUERON REMITIDOS", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 16 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Manizales – Ejecución Territorial", "tecnico": "Esteban", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL MANIZALES – DIRECCIÓN TERRITORIAL CALDAS DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Bajantes, Canales y/vigacanales; 2) Resane y/o pintura de muros; 3) Filtraciones en ventaneria; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 19 JUNIO Y EL 6 JUILIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO UE REMITIR LOS FORMATO QUE  YA FUERON REMITIDOS", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 21 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Fusagasugá – Ejecución Territorial", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL FUSAGASUGÁ – DIRECCIÓN TERRITORIAL CUNDINAMARCA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Mantenimiento de cubiertas , canales, bajantes y tanques de almacenamiento de agua; 2) señalizacion, barandas de proteccion para senderos y alarmas; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 18 JUNIO Y EL 15 JUILIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO HABLAR CON EL AREA JURIDICA DE COMO SE DEBE ESTRUCTURAR LOS PROCESOS SI EN CONJUNTO Y INDIVIDUALES", "compromisos": "PENDIENTE PROGRAMACION DE REUNION", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Pasto – Ejecución Territorial", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL PASTO – DIRECCIÓN TERRITORIAL NARIÑO – ALTO PUTUMAYO DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) 1 reparacion de ascensor  2 Instalacion de barandas Biblioteca  3. Puerta Automatizada del Parqueadero del Sótano 4. Cambio de accesorios sanitarios  5. Mantenimiento correctivo y preventivo de la Planta Electrica  6. UPS – Instalación y Mantenimiento; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 14 JUILIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO HABLAR CON EL AREA JURIDICA DE COMO SE DEBE ESTRUCTURAR LOS PROCESOS SI EN CONJUNTO Y INDIVIDUALES", "compromisos": "PENDIENTE PROGRAMACION DE REUNION", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Cúcuta – Ejecución Territorial", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL CÚCUTA – DIRECCIÓN TERRITORIAL NORTE DE SANTANDER – ARAUCA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Mantenimiento general de sistema electrico,iluminacion,ups,red regulada; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 18 JUINIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO HABLAR CON EL AREA JURIDICA DE COMO SE DEBE ESTRUCTURAR LOS PROCESOS SI EN CONJUNTO Y INDIVIDUALES", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 15 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Risaralda – Ejecución Territorial", "tecnico": "Esteban Yy Andres", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL PEREIRA – DIRECCIÓN TERRITORIAL QUINDÍO – RISARALDA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Filtraciones en ventaneria; 2) Redes sanitarias, bajantes de agua lluvia y Canales; 3) Mantenimiento general para evitar filtraciones y goteras en; 4) Cambio de enchapes de piso y pared en los baños; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 18 JUINIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO HABLAR CON EL AREA JURIDICA DE COMO SE DEBE ESTRUCTURAR LOS PROCESOS SI EN CONJUNTO Y INDIVIDUALES", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 21 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Bucaramanga – Ejecución Territorial", "tecnico": "Camilo Barrios", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL BUCARAMANGA – DIRECCIÓN TERRITORIAL SANTANDER DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) Cerramiento por palomas; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 23 JUINIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO HABLAR CON EL AREA JURIDICA DE COMO SE DEBE ESTRUCTURAR LOS PROCESOS SI EN CONJUNTO Y INDIVIDUALES", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 15 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Ibagué – Ejecución Territorial", "tecnico": "Jony", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "REALIZAR EL MEJORAMIENTO, MANTENIMIENTO Y ADECUACIÓN DE LA INFRAESTRUCTURA FÍSICA DE LA SEDE TERRITORIAL IBAGUÉ – DIRECCIÓN TERRITORIAL TOLIMA DE LA ESCUELA SUPERIOR DE ADMINISTRACIÓN PÚBLICA – ESAP, MEDIANTE EJECUCIÓN DIRECTA POR LA TERRITORIAL, INCLUYENDO LAS SIGUIENTES INTERVENCIONES IDENTIFICADAS EN VISITA TÉCNICA: 1) 1Ejecutar actividades de poda y tala de árboles, cuando aplique, previa verificación técnica y cumplimiento de los permisos ambientales correspondientes.  2, Implementacion de señalizacion y baranda de seguridad escaleras del 2 piso barandas 3. compra de accesorios para sede principal sede ibague  4. pintura general de la sede y reforzamiento de las vallas del encerramiento sede central; CON EL FIN DE GARANTIZAR CONDICIONES ÓPTIMAS DE SEGURIDAD, FUNCIONALIDAD Y ADECUADA PRESTACIÓN DEL SERVICIO INSTITUCIONAL.", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 18 JUINIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO HABLAR CON EL AREA JURIDICA DE COMO SE DEBE ESTRUCTURAR LOS PROCESOS SI EN CONJUNTO Y INDIVIDUALES", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 15 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Huila, Caqueta Y Bajo Putumayo  – Ejecución Territorial", "tecnico": "Walter", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 19 JUINIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO HABLAR CON EL AREA JURIDICA DE COMO SE DEBE ESTRUCTURAR LOS PROCESOS SI EN CONJUNTO Y INDIVIDUALES", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 16 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Mejoramiento Y Mantenimiento Sede Territorial Choco  – Ejecución Territorial", "tecnico": "Ximena", "juridico": "Sin asignar", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "En estructuración", "observaciones": "SE REALIZO REUNION EL 18 JUINIO PARA REALIZAR SEGUIMIENTO A LOS RECUERSOS REMITIDOS, EL COMPROMISO HABLAR CON EL AREA JURIDICA DE COMO SE DEBE ESTRUCTURAR LOS PROCESOS SI EN CONJUNTO Y INDIVIDUALES", "compromisos": "SE PROGRAMA REUNION PARA EL DIA 17 DE JULIO", "dependencia": ""}, {"categoria": "Ejecución Directa Territorial", "proyecto": "Silvicultura", "tecnico": "Marianella Y Duberly", "juridico": "Valentina", "abogado": "Sin asignar", "tipo_proceso": "No especificado", "objeto": "", "valor": null, "avance": 0, "fase": "Sin iniciar", "estado": "Sin información", "observaciones": "Sin observaciones registradas", "compromisos": "", "dependencia": ""}];
+const TERR_DATA = [{"fecha": "17/07/2026", "territorial": "Chocó", "estado": "Retrasado", "descripcion": "No registra avances significativos. La territorial m dificultades por falta de acompañamiento técnico requiere una mesa de trabajo para reiniciar la estructuración del proceso.", "nivel": "Retrasado"}, {"fecha": "17/07/2026", "territorial": "Caldas", "estado": "Avance medio", "descripcion": "Se revisaron los borradores de anexos técnicos y estudios previos. Actualmente realizan ajustes té especialmente en el componente de aires acondicionados y diagnóstico eléctrico.", "nivel": "En estructuración / avance medio"}, {"fecha": "17/07/2026", "territorial": "Bolívar – Córdoba – Sucre – San Andrés", "estado": "En estructuración", "descripcion": "Se encuentran definiendo el alcance definitivo de intervenciones (UPS, aires acondicionados, obra y tala de árboles) y consolidando la documentaci contratar.", "nivel": "En estructuración / avance medio"}, {"fecha": "16/07/2026", "territorial": "Huila – Caquetá – Bajo Putumayo", "estado": "Avance medio", "descripcion": "Se priorizaron cuatro proyectos (aires acondicion adecuaciones locativas, señalización y otros). Ex cotizaciones preliminares y continúa la estructura contractual.", "nivel": "En estructuración / avance medio"}, {"fecha": "16/07/2026", "territorial": "Atlántico – Cesar – Magdalena – La Guajira", "estado": "Inicio de estructuración", "descripcion": "La territorial obtuvo una cotización inicial y actual ajusta el alcance de las actividades, las especific técnicas y las cotizaciones requeridas para inicia proceso.", "nivel": "Inicio de estructuración"}, {"fecha": "16/07/2026", "territorial": "Antioquia", "estado": "En estructuración", "descripcion": "Se realizó seguimiento al cumplimiento de los compromisos adquiridos y al avance de la estruc contractual. Continúan ajustando documentos pa contratación.", "nivel": "En estructuración / avance medio"}, {"fecha": "15/07/2026", "territorial": "Boyacá – Casanare", "estado": "Etapa inicial", "descripcion": "La territorial definió las necesidades y consultó la viabilidad de ejecutar uno o varios procesos contractuales independientes. Se encuentra estructurando los documentos técnicos y jurídico", "nivel": "Inicio de estructuración"}, {"fecha": "15/07/2026", "territorial": "Meta – Guaviare – Guainía – Vaupé – Vichada – Amazonas", "estado": "En estructuración", "descripcion": "Definió ejecutar dos procesos independientes: para UPS y otro para mantenimiento. Se adelant diagnósticos, cotizaciones y elaboración de docu precontractuales.", "nivel": "En estructuración / avance medio"}, {"fecha": "15/07/2026", "territorial": "Tolima", "estado": "En estructuración", "descripcion": "La distribución de los recursos ya fue definida. S encuentran adelantando procesos para tala de á mantenimiento y otras necesidades priorizadas; continúan con la estructuración documental.", "nivel": "En estructuración / avance medio"}, {"fecha": "15/07/2026", "territorial": "Norte de Santander – Arauca", "estado": "En estructuración", "descripcion": "Continúa la elaboración de estudios previos, ane técnicos y revisión de documentos para iniciar el contractual correspondiente a los recursos asign", "nivel": "En estructuración / avance medio"}, {"fecha": "15/07/2026", "territorial": "Santander", "estado": "En revisión técnica", "descripcion": "La territorial remitió los anexos técnicos para ava Grupo de Infraestructura. Se encuentran ajustan alcance de los procesos y evaluando la necesida recursos adicionales.", "nivel": "En estructuración / avance medio"}, {"fecha": "14/07/2026", "territorial": "Cundinamarca", "estado": "En estructuración", "descripcion": "La territorial se encuentra ajustando los documen precontractuales, anexos técnicos y estudios pre acompañamiento del Grupo de Infraestructura y Mantenimiento. Continúa la consolidación del pro contractual.", "nivel": "En estructuración / avance medio"}, {"fecha": "14/07/2026", "territorial": "Nariño – Alto Putumayo", "estado": "Avanzado", "descripcion": "Es una de las territoriales con mayor avance. Pre procesos adjudicados, procesos en ejecución y p en estructuración. Se encuentra realizando segui a la ejecución de los recursos y preparando nuev actuaciones contractuales.", "nivel": "Avance alto"}, {"fecha": "14/07/2026", "territorial": "Quindío", "estado": "Muy avanzado", "descripcion": "El análisis del sector ya fue elaborado, la solicitud cotización del mantenimiento de la sede Armenia lista para publicación en SECOP y únicamente qu saldo aproximado de $1.352.000 de los recursos asignados.", "nivel": "Avance alto"}, {"fecha": "19/06/2026", "territorial": "Valle del Cauca", "estado": "Pendiente de decisión", "descripcion": "La territorial aún no ha definido la ejecución de lo recursos debido a la situación administrativa de s sedes. Está pendiente la decisión institucional pa el proceso contractual.", "nivel": "Pendiente de decisión"}];
+const SEDE_DATA = ALL_DATA.filter(p => p.categoria === 'Sede Central');
+const TERR_PROY_DATA = ALL_DATA.filter(p => p.categoria !== 'Sede Central');
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    window.scrollTo({top:0, behavior:'instant'});
+  });
+});
+document.getElementById('tabCountSede').textContent = SEDE_DATA.length;
+document.getElementById('tabCountTerritorial').textContent = TERR_PROY_DATA.length;
+
+/* ---------- theme ---------- */
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const themeLabel = document.getElementById('themeLabel');
+function setTheme(mode){
+  document.body.setAttribute('data-theme', mode);
+  themeLabel.textContent = mode === 'dark' ? 'Modo claro' : 'Modo oscuro';
+  themeIcon.innerHTML = mode === 'dark'
+    ? '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>'
+    : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+}
+themeToggle.addEventListener('click', ()=>{
+  const cur = document.body.getAttribute('data-theme');
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+});
+setTheme('light');
+document.getElementById('genDate').textContent = 'Actualizado ' + new Date().toLocaleDateString('es-CO', {day:'2-digit', month:'long', year:'numeric'});
+
+/* ---------- helpers ---------- */
+const fmtCOP = v => v==null ? '—' : new Intl.NumberFormat('es-CO', {style:'currency', currency:'COP', maximumFractionDigits:0}).format(v);
+const esc = s => (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* Static hex map — avoids the CSS color-mix() function, which many Android/older
+   mobile browsers do not support. All tints are pre-computed here in JS instead. */
+const HEX = {
+  'var(--navy)':'#0B2E6E','var(--teal)':'#1A7A6E','var(--gold)':'#C8970A','var(--green)':'#1F9D55',
+  'var(--blue)':'#2F6FE0','var(--purple)':'#7C4DFF','var(--gray)':'#8B96A8','var(--gray-light)':'#CBD5E1','var(--red)':'#D6483F'
+};
+function hexToRgba(hex, a){
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+function tint(varColor, a){
+  const hex = HEX[varColor];
+  return hex ? hexToRgba(hex, a) : varColor;
+}
+
+const ESTADO_COLOR = {
+  'En ejecución': 'var(--green)', 'En adjudicación': 'var(--teal)', 'En evaluación': 'var(--blue)',
+  'En ajustes': 'var(--gold)', 'En estructuración': 'var(--navy)', 'Suspendido': 'var(--purple)',
+  'Sin información': 'var(--gray)', 'Por definir': 'var(--gray-light)'
+};
+const FASE_ORDER = ['Sin iniciar','Estructuración inicial','Estudios y validación','Evaluación / adjudicación','Completado (fase precontractual)'];
+const FASE_SHORT = ['Sin iniciar','Estructuración','Estudios','Evaluación/Adjudic.','Completado'];
+const FASE_COLOR = {
+  'Sin iniciar': 'var(--gray)', 'Estructuración inicial': 'var(--gold)', 'Estudios y validación': 'var(--blue)',
+  'Evaluación / adjudicación': 'var(--teal)', 'Completado (fase precontractual)': 'var(--green)'
+};
+const CAT_COLOR = { 'Sede Central': 'var(--navy)', 'Direcciones Territoriales (GIM)': 'var(--teal)', 'Ejecución Directa Territorial': 'var(--gold)' };
+function avanceColor(v){ if(v===0) return 'var(--gray)'; if(v<40) return 'var(--gold)'; if(v<75) return 'var(--blue)'; return 'var(--green)'; }
+
+/* ---------- icon set ---------- */
+function kpiIcon(name){
+  const icons = {
+    total:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>',
+    avance:'<path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M12 7v5l3 3"/>',
+    alert:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>',
+    pause:'<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+    team:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
+    money:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
+    flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V15"/>'
+  };
+  return icons[name]||icons.total;
+}
+function kpiCard({accent, icon, value, label, sub}){
+  return `<div class="kpi-card" style="--accent:${accent}; --accent-tint:${tint(accent,0.14)}">
+    <div class="kpi-top"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${kpiIcon(icon)}</svg></div></div>
+    <div class="kpi-value">${value}</div>
+    <div class="kpi-label">${label}</div>
+    ${sub?`<div class="kpi-sub">${sub}</div>`:''}
+  </div>`;
+}
+
+/* ---------- SVG chart primitives ---------- */
+function donutChart(container, data, opts={}){
+  const size = opts.size||220, stroke=opts.stroke||30, r=(size-stroke)/2, c=2*Math.PI*r, cx=size/2, cy=size/2;
+  const total = data.reduce((a,d)=>a+d.value,0);
+  let offset=0, segs='';
+  data.forEach(d=>{
+    const frac = total? d.value/total : 0;
+    const len = frac*c;
+    segs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="${stroke}"
+      stroke-dasharray="${len} ${c-len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" stroke-linecap="butt"/>`;
+    offset += len;
+  });
+  const svg = `<svg viewBox="0 0 ${size} ${size}" width="100%" style="max-width:${size}px; display:block; margin:0 auto;">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg-soft)" stroke-width="${stroke}"/>
+    ${segs}
+    <text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="26" font-weight="800" fill="var(--text)" font-family="var(--font)">${total}</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="10.5" fill="var(--text-faint)" font-family="var(--font)" letter-spacing=".5">PROYECTOS</text>
+  </svg>`;
+  const legend = `<div class="legend">${data.map(d=>`<div class="legend-item"><span class="legend-swatch" style="background:${d.color}"></span>${d.label} · ${d.value}</div>`).join('')}</div>`;
+  container.innerHTML = svg + legend;
+}
+function barList(container, data, opts={}){
+  const max = opts.max || Math.max(...data.map(d=>d.value), 1);
+  container.innerHTML = data.map(d=>`
+    <div class="bar-row">
+      <div class="bar-label" title="${esc(d.label)}">${esc(d.label)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%; background:${d.color}" data-w="${Math.max(3,100*d.value/max)}"></div></div>
+      <div class="bar-val">${opts.suffix==='%' ? d.value+'%' : d.value}</div>
+    </div>`).join('');
+  requestAnimationFrame(()=>{ setTimeout(()=>{ container.querySelectorAll('.bar-fill').forEach(el=>{ el.style.width = el.dataset.w+'%'; }); }, 60); });
+}
+
+/* =========================================================================
+   GENERIC PROJECT SECTION RENDERER — used for both Sede Central & Territorial
+   ========================================================================= */
+function renderProjectSection(cfg){
+  const { data, id, groupField, groupColorFn, groupLabelFn, groupChartLabel } = cfg;
+
+  // pipeline strip
+  if(id.pipelineBand){
+    const counts = {}; FASE_ORDER.forEach(f=>counts[f]=0);
+    data.forEach(p=>counts[p.fase]=(counts[p.fase]||0)+1);
+    const band = document.getElementById(id.pipelineBand);
+    let html = '';
+    FASE_ORDER.forEach((f,i)=>{
+      html += `<div class="pl-step"><div class="pl-node">${i+1}</div>
+        <div><div class="pl-label">${FASE_SHORT[i]}</div><div class="pl-count">${counts[f]} proyectos</div></div></div>`;
+      if(i < FASE_ORDER.length-1) html += '<div class="pl-line"></div>';
+    });
+    band.innerHTML = html;
+    const nodes = band.querySelectorAll('.pl-node');
+    FASE_ORDER.forEach((f,i)=>{ nodes[i].style.background = FASE_COLOR[f]; nodes[i].style.borderColor = FASE_COLOR[f]; });
+  }
+
+  // KPIs
+  const total = data.length;
+  const avgAvance = total ? Math.round(data.reduce((a,p)=>a+p.avance,0)/total) : 0;
+  const sinIniciar = data.filter(p=>p.fase==='Sin iniciar').length;
+  const avanzados = data.filter(p=>p.fase==='Evaluación / adjudicación' || p.fase==='Completado (fase precontractual)').length;
+  const suspendidos = data.filter(p=>p.estado==='Suspendido').length;
+  const conValor = data.filter(p=>p.valor);
+  const sumaValor = conValor.reduce((a,p)=>a+p.valor,0);
+
+  let extraKpi = '';
+  if(id.kpiExtra === 'sede'){
+    const tipos = new Set(data.map(p=>p.tipo_proceso).filter(t=>t!=='No especificado'));
+    extraKpi = kpiCard({accent:'var(--navy)', icon:'flag', value: tipos.size, label:'Tipos de proceso de contratación', sub:[...tipos].slice(0,4).join(' · ')});
+  } else if(id.kpiExtra === 'territorial'){
+    const cats = {}; data.forEach(p=>cats[p.categoria]=(cats[p.categoria]||0)+1);
+    extraKpi = kpiCard({accent:'var(--gold)', icon:'flag', value: cats['Ejecución Directa Territorial']||0, label:'Ejecutados directamente por la territorial', sub:`${cats['Direcciones Territoriales (GIM)']||0} estructurados por GIM`});
+  }
+
+  const cards = [
+    kpiCard({accent:'var(--navy)', icon:'total', value: total, label:'Proyectos en seguimiento', sub: id.totalSub}),
+    kpiCard({accent:'var(--teal)', icon:'avance', value: avgAvance+'%', label:'Avance documental promedio', sub:'Cumplimiento de hitos precontractuales'}),
+    kpiCard({accent:'var(--gold)', icon:'pause', value: sinIniciar, label:'Sin iniciar estructuración', sub: total? `${Math.round(100*sinIniciar/total)}% del total` : ''}),
+    kpiCard({accent:'var(--blue)', icon:'flag', value: avanzados, label:'En evaluación o adjudicación', sub:'Más cerca de firmar acta de inicio'}),
+    kpiCard({accent:'var(--purple)', icon:'alert', value: suspendidos, label:'Proyectos suspendidos', sub:'Requieren decisión o reactivación'}),
+    kpiCard({accent:'var(--green)', icon:'money', value: fmtCOP(sumaValor), label:'Valor referenciado', sub:`Dato disponible en ${conValor.length} de ${total} proyectos`}),
+    extraKpi
+  ];
+  document.getElementById(id.kpiGrid).innerHTML = cards.join('');
+
+  // donut estado
+  const estadoCounts = {};
+  data.forEach(p=>estadoCounts[p.estado]=(estadoCounts[p.estado]||0)+1);
+  const estadoData = Object.keys(ESTADO_COLOR).filter(k=>estadoCounts[k]).map(k=>({label:k, value:estadoCounts[k], color:ESTADO_COLOR[k]})).sort((a,b)=>b.value-a.value);
+  donutChart(document.getElementById(id.donutEstado), estadoData);
+  if(id.donutHint) document.getElementById(id.donutHint).textContent = total + ' proyectos';
+
+  // bar by group field
+  const groups = [...new Set(data.map(p=>p[groupField]))];
+  const groupData = groups.map(g=>{
+    const items = data.filter(p=>p[groupField]===g);
+    const avg = items.length ? Math.round(items.reduce((a,p)=>a+p.avance,0)/items.length) : 0;
+    return {label:(groupLabelFn?groupLabelFn(g):g)+' ('+items.length+')', value:avg, color:groupColorFn(g)};
+  }).sort((a,b)=>b.value-a.value);
+  barList(document.getElementById(id.barGroup), groupData, {suffix:'%', max:100});
+
+  // fase bar
+  const faseCounts = {}; FASE_ORDER.forEach(f=>faseCounts[f]=0);
+  data.forEach(p=>faseCounts[p.fase]++);
+  const faseData = FASE_ORDER.map((f,i)=>({label:FASE_SHORT[i], value:faseCounts[f], color:FASE_COLOR[f]}));
+  barList(document.getElementById(id.barFase), faseData, {max: total});
+
+  // ranking
+  const top = [...data].sort((a,b)=>b.avance-a.avance).slice(0,10);
+  document.getElementById(id.topRanking).innerHTML = top.map((p,i)=>`
+    <div class="bar-row" style="grid-template-columns:26px 1fr 1fr 60px;">
+      <div class="bar-label" style="color:var(--text-faint); font-weight:800;">${i+1}</div>
+      <div class="bar-label" style="white-space:normal; font-weight:700; color:var(--text);" title="${esc(p.proyecto)}">${esc(p.proyecto)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%; background:${avanceColor(p.avance)}" data-w="${Math.max(3,p.avance)}"></div></div>
+      <div class="bar-val">${p.avance}%</div>
+    </div>`).join('');
+  requestAnimationFrame(()=>{ setTimeout(()=>{ document.querySelectorAll('#'+id.topRanking+' .bar-fill').forEach(el=>{el.style.width=el.dataset.w+'%';}); }, 60); });
+
+  // alerts
+  const susp = data.filter(p=>p.estado==='Suspendido');
+  const sinInfo = data.filter(p=>p.estado==='Sin información'||p.estado==='Por definir');
+  const sinIniciarList = data.filter(p=>p.fase==='Sin iniciar');
+  function alertCard(accent, icon, title, count, items, emptyText, showReason){
+    return `<div class="alert-card" style="--accent:${accent}">
+      <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${kpiIcon(icon)}</svg>${title}</h4>
+      <div class="alert-count" style="color:${accent}">${count}</div>
+      <ul class="alert-list">${items.length? items.slice(0,5).map(p=>`<li style="flex-direction:column; align-items:flex-start; gap:2px;"><span style="display:flex; justify-content:space-between; width:100%;"><b>${esc(p.proyecto)}</b></span>${showReason?`<span style="font-weight:500; color:var(--text-faint); font-size:11px;">"${esc(p.observaciones)}"</span>`:''}</li>`).join('') : `<li class="alert-empty">${emptyText}</li>`}</ul>
+      ${items.length>5?`<div class="kpi-sub" style="margin-top:8px;">+ ${items.length-5} proyectos adicionales</div>`:''}
+    </div>`;
+  }
+  document.getElementById(id.alertGrid).innerHTML =
+    alertCard('var(--purple)','pause','Proyectos suspendidos', susp.length, susp, 'No hay proyectos suspendidos.', true) +
+    alertCard('var(--gray)','alert','Sin información de estado', sinInfo.length, sinInfo, 'Todos los proyectos tienen estado registrado.', false) +
+    alertCard('var(--gold)','flag','Sin iniciar estructuración', sinIniciarList.length, sinIniciarList, 'Todos los proyectos ya iniciaron estructuración.', false);
+
+  // table
+  const searchInput = document.getElementById(id.searchInput);
+  const filterGroup = document.getElementById(id.filterGroup);
+  const filterEstado = document.getElementById(id.filterEstado);
+  const resultCount = document.getElementById(id.resultCount);
+  const tableBody = document.getElementById(id.tableBody);
+  let sortKey = 'avance', sortDir = -1;
+
+  groups.forEach(g=>{ const o=document.createElement('option'); o.value=g; o.textContent=groupLabelFn?groupLabelFn(g):g; filterGroup.appendChild(o); });
+  [...new Set(data.map(p=>p.estado))].forEach(e=>{ const o=document.createElement('option'); o.value=e; o.textContent=e; filterEstado.appendChild(o); });
+
+  function pipelineMini(p){
+    const idx = FASE_ORDER.indexOf(p.fase);
+    return `<div class="pipeline-mini">${FASE_ORDER.map((f,i)=>`<div class="seg ${i<=idx?'on':''}"></div>`).join('')}</div>`;
+  }
+
+  function renderTable(){
+    const q = searchInput.value.trim().toLowerCase();
+    const fg = filterGroup.value, fe = filterEstado.value;
+    let rows = data.filter(p=>{
+      if(fg && p[groupField]!==fg) return false;
+      if(fe && p.estado!==fe) return false;
+      if(q && !(p.proyecto.toLowerCase().includes(q) || p.objeto.toLowerCase().includes(q) || p.tecnico.toLowerCase().includes(q))) return false;
+      return true;
+    });
+    rows.sort((a,b)=>{
+      let va=a[sortKey], vb=b[sortKey];
+      if(typeof va==='string'){ va=va.toLowerCase(); vb=(vb||'').toLowerCase(); }
+      if(sortKey==='valor'){ va = va||0; vb = vb||0; }
+      if(va<vb) return -1*sortDir; if(va>vb) return 1*sortDir; return 0;
+    });
+    resultCount.textContent = rows.length + ' de ' + data.length + ' proyectos';
+
+    tableBody.innerHTML = rows.map((p,i)=>{
+      const ec = ESTADO_COLOR[p.estado]||'var(--gray)';
+      const rid = id.tableBody+'row'+i;
+      const groupDisplay = groupField==='categoria' ? esc(p.categoria).replace('Direcciones Territoriales (GIM)','GIM').replace('Ejecución Directa Territorial','Ejec. Directa') : esc(p.tipo_proceso);
+      return `<tr data-id="${rid}">
+        <td class="proyecto">${esc(p.proyecto)}<span class="cat-tag">${groupField==='categoria'?esc(p.tipo_proceso):esc(p.categoria)}</span></td>
+        <td>${groupDisplay}</td>
+        <td><div class="mini-wrap"><div class="mini-track"><div class="mini-fill" style="width:${p.avance}%; background:${avanceColor(p.avance)}"></div></div><span class="mini-pct">${p.avance}%</span></div></td>
+        <td><span class="badge" style="background:${tint(ec,0.16)}; color:${ec}"><span class="dot" style="background:${ec}"></span>${esc(p.estado)}</span></td>
+        <td>${esc(p.tecnico)}</td>
+        <td>${fmtCOP(p.valor)}</td>
+        <td style="text-align:right;"><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></td>
+      </tr>
+      <tr class="detail-row"><td colspan="7"><div class="detail-inner" id="${rid}-detail">
+        <div class="detail-grid">
+          <div class="detail-block">
+            <h5>Objeto del proceso</h5>
+            <p>${esc(p.objeto) || 'No especificado.'}</p>
+            <h5>Ruta del embudo precontractual</h5>
+            ${pipelineMini(p)}
+          </div>
+          <div class="detail-block">
+            <h5>Observaciones</h5>
+            <p>${esc(p.observaciones)}</p>
+            ${p.compromisos?`<h5>Compromisos</h5><p>${esc(p.compromisos)}</p>`:''}
+            ${p.dependencia?`<h5>Dependencia / trámite actual</h5><p>${esc(p.dependencia)}</p>`:''}
+            <h5>Equipo asignado</h5>
+            <p>Técnico: ${esc(p.tecnico)} · Jurídico: ${esc(p.juridico)} · Abogado contratación: ${esc(p.abogado)}</p>
+          </div>
+        </div>
+      </div></td></tr>`;
+    }).join('');
+
+    tableBody.querySelectorAll('tr[data-id]').forEach(tr=>{
+      tr.addEventListener('click', ()=>{
+        const rid = tr.dataset.id;
+        const detail = document.getElementById(rid+'-detail');
+        const isOpen = detail.classList.contains('open');
+        detail.classList.toggle('open', !isOpen);
+        tr.classList.toggle('expanded', !isOpen);
+      });
+    });
+  }
+  searchInput.addEventListener('input', renderTable);
+  filterGroup.addEventListener('change', renderTable);
+  filterEstado.addEventListener('change', renderTable);
+  document.querySelectorAll('#'+id.table+' th[data-sort]').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const key = th.dataset.sort;
+      if(sortKey===key) sortDir*=-1; else { sortKey=key; sortDir=-1; }
+      renderTable();
+    });
+  });
+  renderTable();
+}
+
+/* ---- instantiate Sede Central section ---- */
+renderProjectSection({
+  data: SEDE_DATA,
+  groupField: 'tipo_proceso',
+  groupColorFn: (g)=> g==='No Especificado'||g==='No especificado' ? 'var(--gray)' : 'var(--navy)',
+  groupLabelFn: (g)=>g,
+  id: {
+    pipelineBand:'sedePipelineBand', kpiGrid:'sedeKpiGrid', kpiExtra:'sede',
+    totalSub:'Agrupados como "Sede Central" en el Excel de seguimiento GIM',
+    donutEstado:'sedeDonutEstado', donutHint:'sedeDonutHint',
+    barGroup:'sedeBarGroup', barFase:'sedeBarFase',
+    topRanking:'sedeTopRanking', alertGrid:'sedeAlertGrid',
+    table:'sedeTable', tableBody:'sedeTableBody',
+    searchInput:'sedeSearchInput', filterGroup:'sedeFilterGroup', filterEstado:'sedeFilterEstado', resultCount:'sedeResultCount'
+  }
+});
+
+/* ---- instantiate Territoriales (Excel projects) section ---- */
+renderProjectSection({
+  data: TERR_PROY_DATA,
+  groupField: 'categoria',
+  groupColorFn: (g)=>CAT_COLOR[g]||'var(--gold)',
+  groupLabelFn: (g)=>g.replace(' (GIM)',''),
+  id: {
+    pipelineBand:'terrPipelineBand', kpiGrid:'terrProyKpiGrid', kpiExtra:'territorial',
+    totalSub:'Agrupados como "Territoriales" en el Excel de seguimiento GIM',
+    donutEstado:'terrProyDonutEstado', donutHint:'terrProyDonutHint',
+    barGroup:'terrProyBarGroup', barFase:'terrProyBarFase',
+    topRanking:'terrProyTopRanking', alertGrid:'terrProyAlertGrid',
+    table:'terrProyTable', tableBody:'terrProyTableBody',
+    searchInput:'terrProySearchInput', filterGroup:'terrProyFilterGroup', filterEstado:'terrProyFilterEstado', resultCount:'terrProyResultCount'
+  }
+});
+
+/* =========================================================================
+   TERRITORIAL QUALITATIVE TRACKING (docx) — subsection 2 of Territoriales tab
+   ========================================================================= */
+const NIVEL_COLOR = {
+  'Avance alto': 'var(--green)', 'En estructuración / avance medio': 'var(--navy)',
+  'Inicio de estructuración': 'var(--gold)', 'Retrasado': 'var(--red)', 'Pendiente de decisión': 'var(--purple)'
+};
+const NIVEL_ORDER = ['Avance alto','En estructuración / avance medio','Inicio de estructuración','Retrasado','Pendiente de decisión'];
+
+(function renderTerritorialKPIs(){
+  const counts = {}; NIVEL_ORDER.forEach(n=>counts[n]=0);
+  TERR_DATA.forEach(t=>counts[t.nivel]=(counts[t.nivel]||0)+1);
+  const cards = [
+    kpiCard({accent:'var(--navy)', icon:'total', value: TERR_DATA.length, label:'Territoriales / agrupaciones en seguimiento', sub:'Con recursos de hasta $100 millones asignados'}),
+    kpiCard({accent:'var(--green)', icon:'flag', value: counts['Avance alto'], label:'Con avance alto', sub:TERR_DATA.filter(t=>t.nivel==='Avance alto').map(t=>t.territorial).join(' · ')}),
+    kpiCard({accent:'var(--gold)', icon:'pause', value: counts['Inicio de estructuración'], label:'En inicio de estructuración', sub:'Recién comienzan el trámite documental'}),
+    kpiCard({accent:'var(--red)', icon:'alert', value: counts['Retrasado'], label:'Territoriales retrasadas', sub:TERR_DATA.filter(t=>t.nivel==='Retrasado').map(t=>t.territorial).join(', ') || 'Ninguna'}),
+    kpiCard({accent:'var(--purple)', icon:'pause', value: counts['Pendiente de decisión'], label:'Pendientes de decisión institucional', sub:TERR_DATA.filter(t=>t.nivel==='Pendiente de decisión').map(t=>t.territorial).join(', ') || 'Ninguna'}),
+  ];
+  document.getElementById('terrKpiGrid').innerHTML = cards.join('');
+})();
+
+(function renderTerritorialDonut(){
+  const counts = {}; NIVEL_ORDER.forEach(n=>counts[n]=0);
+  TERR_DATA.forEach(t=>counts[t.nivel]=(counts[t.nivel]||0)+1);
+  const data = NIVEL_ORDER.filter(n=>counts[n]).map(n=>({label:n, value:counts[n], color:NIVEL_COLOR[n]}));
+  donutChart(document.getElementById('donutTerritorial'), data);
+})();
+
+(function renderTerritorialTimeline(){
+  const sorted = [...TERR_DATA].sort((a,b)=> b.fecha.split('/').reverse().join('').localeCompare(a.fecha.split('/').reverse().join('')));
+  document.getElementById('terrTimeline').innerHTML = sorted.map(t=>`
+    <div style="display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--border);">
+      <div style="font-size:11px; font-weight:800; color:var(--text-faint); width:64px; flex-shrink:0; padding-top:1px;">${esc(t.fecha)}</div>
+      <div style="flex:1;"><div style="font-size:12.5px; font-weight:700;">${esc(t.territorial)}</div></div>
+      <span class="badge" style="background:${tint(NIVEL_COLOR[t.nivel],0.16)}; color:${NIVEL_COLOR[t.nivel]}; flex-shrink:0;"><span class="dot" style="background:${NIVEL_COLOR[t.nivel]}"></span>${esc(t.estado)}</span>
+    </div>`).join('');
+})();
+
+const terrSearchInput = document.getElementById('terrSearchInput');
+const terrFilterNivel = document.getElementById('terrFilterNivel');
+const terrCards = document.getElementById('terrCards');
+const terrResultCount = document.getElementById('terrResultCount');
+NIVEL_ORDER.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; terrFilterNivel.appendChild(o); });
+
+function renderTerrCards(){
+  const q = terrSearchInput.value.trim().toLowerCase();
+  const fn = terrFilterNivel.value;
+  let rows = TERR_DATA.filter(t=>{
+    if(fn && t.nivel!==fn) return false;
+    if(q && !(t.territorial.toLowerCase().includes(q) || t.descripcion.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  terrResultCount.textContent = rows.length + ' de ' + TERR_DATA.length + ' territoriales';
+  terrCards.innerHTML = rows.map(t=>{
+    const c = NIVEL_COLOR[t.nivel];
+    return `<div class="terr-card" style="--accent:${c}">
+      <div class="terr-card-top"><h4>${esc(t.territorial)}</h4><div class="terr-date">${esc(t.fecha)}</div></div>
+      <span class="badge" style="background:${tint(c,0.16)}; color:${c}"><span class="dot" style="background:${c}"></span>${esc(t.estado)}</span>
+      <p>${esc(t.descripcion)}</p>
+    </div>`;
+  }).join('');
+}
+terrSearchInput.addEventListener('input', renderTerrCards);
+terrFilterNivel.addEventListener('change', renderTerrCards);
+renderTerrCards();
+</script>
+</body>
+</html>
